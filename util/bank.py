@@ -64,15 +64,14 @@ class Bank(object):
             self.reserves += -1
             self.loans += 1
 
-    def nft_loan_repayment(self, interest_rate):
-        """NFT pays back a loan."""
-        self.loans += -1
-        self.reserves += 1
-        #self.total_profit += interest_rate
-
-    def nft_loan_default(self):
-        """NFT defaults on a loan."""
-        self.loans += -1
+    def nft_loan_repayment(self, default_prob):
+        """NFT pays back a loan, with chance of default."""
+        rng = random.random()
+        if rng < default_prob:
+            self.loans += -1
+        else:
+            self.loans += -1
+            self.reserves += 1
 
     def add_neighbor(self, neighbor):
         """Creates ability for bank to make interbank transactions with
@@ -105,13 +104,24 @@ class Bank(object):
     def recall_nft_loans(self, default_rate):
         """Bank recalls outstanding NFT loan."""
         if self.loans > 0:
-            rng = random.random()
-            if rng >= default_rate:
-                self.nft_loan_default()
-            else:
-                self.nft_loan_repayment()
+            self.nft_loan_repayment()
         else:
             self.state = 3
+
+    def check_reserves(self):
+        """Bank checks if it has enough reserves. If it does not then it tries
+        to recover assets until it does."""
+        while self.needs_cash():
+            if self.state == 0:
+                self.borrow()
+            elif self.state == 1:
+                self.recall_interbank_loan()
+            elif self.state == 2:
+                self.recall_nft_loans()
+            elif self.state == 3:
+                break
+            else:
+                raise ValueError('Bank in state: %s' % self.state)
 
     def check_solvency(self):
         """Determines whether bank is solvent. If it is not it dies."""
