@@ -1,5 +1,8 @@
-# Ignore virtual environment
+# Virtual environment
 venv/
 
 # Byte compiled files
 *.py[cod]
+
+# VIM configuration
+.vimrc

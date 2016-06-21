@@ -1,7 +1,8 @@
 py-avalanche
 ============
 
-Summary: A Python implementation of the Bank Avalanche Model.
+Summary: A Python implementation of the Bank Avalanche Model. An overview of
+the model can be found at [insert link](http://www.google.com).
 
 #Installing py-avalanche
 
@@ -24,3 +25,6 @@ pip install -r requirements.txt  # Install Python dependencies
 # Work for a while ...
 deactivate                       # Exit the virtual environment
 ```
+
+# Overview
+
