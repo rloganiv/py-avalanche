@@ -15,7 +15,7 @@ class Bank(object):
             been made to that bank.
         reserve_ratio (float): Ratio of deposits bank must have on hand.
     """
-    def __init__(self, deposits, reserves, loans, reserve_ratio):
+    def __init__(self, deposits, reserves, loans, reserve_ratio, default_prob):
         """Initialize bank agent."""
         self.deposits = deposits
         self.reserves = reserves
@@ -24,6 +24,9 @@ class Bank(object):
         self.interbank_balances = {}
         self.total_profit = 0
         self.state = 0
+        self.default_prob = default_prob
+        self.is_borrowing = False
+        self.dead = False
 
     def can_loan(self):
         """True if bank has liquid assets available for investment."""
@@ -49,6 +52,7 @@ class Bank(object):
         # If no deposits, do nothing
         if self.deposits == 0:
             pass
+
         # If there is sufficient money in reserves then refund deposit
         elif self.reserves > 0:
             self.deposits += -1
@@ -64,10 +68,10 @@ class Bank(object):
             self.reserves += -1
             self.loans += 1
 
-    def nft_loan_repayment(self, default_prob):
+    def nft_loan_repayment(self):
         """NFT pays back a loan, with chance of default."""
         rng = random.random()
-        if rng < default_prob:
+        if rng < self.default_prob:
             self.loans += -1
         else:
             self.loans += -1
@@ -78,17 +82,23 @@ class Bank(object):
         neighbor."""
         if neighbor not in self.interbank_balances:
             self.interbank_balances[neighbor] = 0
-            neighbor.interbank_balances[self] = 0
+            neighbor.add_neighbor(self)
 
     def borrow(self):
         """Bank borrows from a neighbor if possible."""
+        self.is_borrowing = True
         for neighbor in self.interbank_balances:
-            if neighbor.can_loan():
+            if neighbor.can_loan() and not neighbor.is_borrowing:
                 self.reserves += 1
                 neighbor.reserves += -1
                 self.interbank_balances[neighbor] += -1
                 neighbor.interbank_balances[self] += 1
+                neighbor.check_reserves()
+                neighbor.check_solvency()
+                neighbor.check_liquidity()
+                self.is_borrowing = False
                 return
+        self.is_borrowing = False
         self.state = 1
 
     def recall_interbank_loan(self):
@@ -98,10 +108,13 @@ class Bank(object):
                 neighbor.interbank_balances[self] += 1
                 self.interbank_balances[neighbor] += -1
                 self.reserves += 1
+                neighbor.check_reserves()
+                neighbor.check_solvency()
+                neighbor.check_liquidity()
                 return
         self.state = 2
 
-    def recall_nft_loans(self, default_rate):
+    def recall_nft_loans(self):
         """Bank recalls outstanding NFT loan."""
         if self.loans > 0:
             self.nft_loan_repayment()
@@ -137,7 +150,8 @@ class Bank(object):
 
     def die(self):
         """Removes bank from network, and sets dead flag to True."""
-        for neighbor in self.interbank_balances:
+        for neighbor in self.interbank_balances.copy():
             del neighbor.interbank_balances[self]
+            del self.interbank_balances[neighbor]
         self.dead = True
 
