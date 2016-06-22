@@ -1,4 +1,5 @@
 from util.bank import Bank
+from util.event import Generator
 import numpy as np
 
 # Globals to be made args
@@ -22,14 +23,18 @@ if __name__ == '__main__':
         bank.add_neighbor(bank_list[(i + 1) % n_banks])
 
     # Event generation
-    events = ['nft_deposit', 'nft_withdrawal', 'nft_loan_req',
-              'nft_loan_repay']
-    p_events = [deposit_rate, withdrawal_rate, loan_rate, repay_rate]
+    event_dict = {
+        'nft_deposit': deposit_rate,
+        'nft_withdrawal': withdrawal_rate,
+        'nft_loan_req': loan_rate,
+        'nft_loan_repay': repay_rate
+    }
+    event_gen = Generator(event_dict)
 
     # Main loop
     while(n_banks > 0 and iterations < max_iter):
         # Generate event
-        event = np.random.choice(events, p = p_events)
+        event = event_gen.draw_event()[0]
         bank = np.random.choice(bank_list)
         if event == 'nft_deposit':
             bank.nft_deposit()
@@ -45,7 +50,7 @@ if __name__ == '__main__':
         if bank.dead:
             bank_list.remove(bank)
             n_banks += -1
-            #TODO: Add avalanche tracker properly define bank reaction logic
+            #TODO: Add avalanche tracker
             for neighbor in bank.interbank_balances:
                 neighbor.check_reserves()
                 neighbor.check_solvency()
