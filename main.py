@@ -14,6 +14,8 @@ default_prob = .01
 n_banks = 8
 max_iter = 1000000
 topology = 'Complete'
+loan_interest_rate = .05
+deposit_interest_rate = .035
 
 if __name__ == '__main__':
     # Setup
@@ -39,7 +41,8 @@ if __name__ == '__main__':
     time = 0
     period_remaining = 1
 
-    bank_list = [Bank(1000, 310, 700, reserve_ratio, default_prob)
+    bank_list = [Bank(1000, 310, 700, reserve_ratio, default_prob,
+                      loan_interest_rate, deposit_interest_rate)
                  for i in xrange(n_banks)]
     create_links(bank_list, topology)
     live_list = bank_list
@@ -62,7 +65,8 @@ if __name__ == '__main__':
         time += delta_t
         period_remaining += -delta_t
         while period_remaining <= 0:
-            # TODO: Payout interest
+            for bank in live_list:
+                bank.interest_payments()
             period_remaining += 1
 
         if event == 'nft_deposit':

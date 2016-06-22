@@ -16,7 +16,8 @@ class Bank(object):
             been made to that bank.
         reserve_ratio (float): Ratio of deposits bank must have on hand.
     """
-    def __init__(self, deposits, reserves, loans, reserve_ratio, default_prob):
+    def __init__(self, deposits, reserves, loans, reserve_ratio, default_prob,
+                 loan_interest_rate, deposit_interest_rate):
         """Initialize bank agent."""
         self.deposits = deposits
         self.reserves = reserves
@@ -26,6 +27,8 @@ class Bank(object):
         self.total_profit = 0
         self.state = 0
         self.default_prob = default_prob
+        self.loan_interest_rate = loan_interest_rate
+        self.deposit_interest_rate = deposit_interest_rate
         self.is_borrowing = False
         self.dead = False
 
@@ -73,6 +76,10 @@ class Bank(object):
         else:
             self.loans += -1
             self.reserves += 1
+
+    def interest_payments(self):
+        self.total_profit += self.loans * self.loan_interest_rate - \
+                self.deposits * self.deposit_interest_rate
 
     def add_neighbor(self, neighbor):
         """Creates ability for bank to make interbank transactions with
