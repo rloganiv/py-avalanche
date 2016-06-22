@@ -6,3 +6,6 @@ venv/
 
 # VIM configuration
 .vimrc
+
+# Temporary Files
+*.swp

@@ -60,11 +60,7 @@ class Bank(object):
             self.reserves += -1
 
     def nft_loan_request(self):
-        """NFT requests a loan.
-
-        Returns:
-            True if loan accepted, False if loan denied.
-        """
+        """NFT requests a loan."""
         if self.can_loan():
             self.reserves += -1
             self.loans += 1
@@ -135,7 +131,8 @@ class Bank(object):
             elif self.state == 3:
                 break
             else:
-                raise ValueError('Bank in state: %s' % self.state)
+                raise ValueError('Bank in invalid state: %s' % self.state)
+        self.state = 0
 
     def check_solvency(self):
         """Determines whether bank is solvent. If it is not it dies."""
