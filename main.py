@@ -1,4 +1,4 @@
-from util.bank import Bank
+from util.bank import Bank, create_links
 from util.event import Generator
 import numpy as np
 
@@ -11,16 +11,14 @@ repay_rate = .1
 default_prob = .01
 n_banks = 8
 max_iter = 1000000
+topology = 'Complete'
 
 if __name__ == '__main__':
     # Setup
     iterations = 0
     bank_list = [Bank(1000, 310, 700, reserve_ratio, default_prob)
                  for i in xrange(n_banks)]
-
-    # Circle topology
-    for i, bank in enumerate(bank_list):
-        bank.add_neighbor(bank_list[(i + 1) % n_banks])
+    create_links(bank_list, topology)
 
     # Event generation
     event_dict = {

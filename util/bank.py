@@ -1,4 +1,5 @@
 import random
+from itertools import combinations
 
 
 class Bank(object):
@@ -154,4 +155,24 @@ class Bank(object):
             del neighbor.interbank_balances[self]
             del self.interbank_balances[neighbor]
         self.dead = True
+
+
+def create_links(bank_list, topology=None):
+    """Creates links between banks according to specified topology.
+
+    args:
+        bank_list = A list of banks to link together.
+        topology = One of: None, 'Circle', 'Complete', or 'Star'
+    """
+    if topology == 'Circle':
+        for i, bank in enumerate(bank_list):
+            bank.add_neighbor(bank_list[(i + 1) % len(bank_list)])
+
+    if topology == 'Star':
+        for bank in bank_list[1:]:
+            bank.add_neighbor(bank_list[0])
+
+    if topology == 'Complete':
+        for bank_1, bank_2 in combinations(bank_list, 2):
+            bank_1.add_neighbor(bank_2)
 
